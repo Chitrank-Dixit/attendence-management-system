@@ -15,7 +15,12 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class AttendenceListSerializer(serializers.ListSerializer):
     def create(self, validated_data):
-        attendence = [Attendence(**item) for item in validated_data if ValidateDate(item['date']).validate_date()]
+        for item in validated_data:
+            if not ValidateDate(item['date']).validate_date():
+                raise serializers.ValidationError({
+                    'date': 'date supplied here is not valid, it should not be ahead of time'
+                 })
+        attendence = [Attendence(**item) for item in validated_data]
         return Attendence.objects.bulk_create(attendence)
 
 
